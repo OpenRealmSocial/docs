@@ -1,0 +1,33 @@
+---
+title: 'Concepts'
+description:
+  ''
+---
+
+The protocol comprises five key elements:
+
+1. Accounts: Represent network users.
+2. Usernames: Link to accounts.
+3. Signers: Authorize messages for accounts.
+4. Messages: Public broadcasts by accounts.
+5. Storage: Necessary for message publication by accounts.
+
+# Accounts
+
+Each OpenRealm account signifies an individual on the network, identified by a unique OpenRealm ID (fid), like 78213. These fids are allocated and managed through an Ethereum-based IdRegistry contract. Users obtain a new fid via a transaction with IdRegistry. The fid's owning address is termed the 'custody address.' The IdRegistry guarantees unique fid assignment to addresses and enables fid transfers.
+
+# Usernames
+
+Usernames serve to recognize or reference accounts. An account can link multiple usernames, but only one remains active. OpenRealm accommodates both onchain ENS names and offchain names via its fcast.id domain. Each account can claim a complimentary name under fcast.id, but names from other domains like .eth are also usable. Claiming a username involves submitting a signed proof to the network.
+
+# Signers 
+
+Signers, cryptographic key pairs, endorse messages. Accounts may have several signers, useful for shared account management or concurrent app usage. OpenRealm manages signers onchain using a KeyRegistry contract. Signers are offchain-generated Ed25519 keys. Registering a signer involves a KeyRegistry transaction with the signer's public key. The corresponding private key is then used for message signing and network publishing.
+
+# Messages
+
+Messages are public account updates within OpenRealm, ranging from posts and follows to profile picture changes. Various message types exist, each with unique attributes, criteria, and meanings. Messages are stored offchain on OpenRealm Hubs. A message, formatted as a protobuf, needs hashing and signing by an account's signer. Provided sufficient storage, users can dispatch messages to Hubs, which verify the authenticity of signers before acceptance.
+
+# Storage 
+
+Storage permits accounts to disseminate messages on the network. It is leased annually, akin to web server space rental. Onchain management and tracking of storage are conducted via the StorageRegistry contract. Storage units determine the number of messages an account can store. Storage units are rentable by anyone from the StorageRegistry, with prices and capacities fluctuating based on market supply and demand.

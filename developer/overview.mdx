@@ -1,0 +1,70 @@
+---
+title: 'Overview'
+description:
+  'Social networks are typically managed by a business that has access to the relationships, data, and individuals on them. Although this methodology has produced a number of successful products, it eventually addresses the same issues. Users and developers freedoms are curtailed, and they are vulnerable to unwanted moderation and privacy intrusions.'
+---
+
+## Introduction to Decentralization in Social Media
+
+Traditionally, social networks are governed by a central authority that oversees user interactions, data, and connections. While this model has yielded many successful platforms, it often leads to recurring issues like restricted user freedoms, intrusive moderation, and privacy breaches.
+
+A new protocol that emphasizes robust decentralization might be a more effective solution. It enables developers to create applications without the fear of exclusion from the network and allows users to own their data and switch between applications freely. Although challenging to develop initially, this model promises more aligned incentives for sustainable growth.
+
+Previous decentralization efforts have varied in approach and success. ActivityPub adopted a federated model, SecureScuttlebutt chose peer-to-peer networking, and Peepeth was built on blockchain technology. OpenRealm integrates these concepts with a fresh design that employs blockchains and conflict-free replicated data types to deliver:
+
+```
+1. Decentralized, secure, and recoverable user identities.
+2. Access to data that is concurrent, permissionless, and cost-efficient for developers.
+3. Prompt and widespread distribution of updates throughout the network.
+```
+
+## Identity Managment
+
+In OpenRealm, user identity is denoted by a numerical ID (e.g., 8930123) linked to a key pair. The system utilizes a smart contract registry on a Turing-complete blockchain to connect these identifiers to their respective key pairs. Users can create a new key pair or address and register their identity with the contract. The registry supports key rotation for security purposes, and smart contract wallets offer a safeguard against key loss.
+
+OpenRealm IDs, or fids, are inexpensive, non-descriptive numerical values available in abundance. Users have the option to attach readable names from various namespaces to their fids when using apps. This separation of identity and namespace ensures high levels of decentralization, leaving issues like name squatting and impersonation to the namespace layer. Users can select their preferred namespace or employ multiple simultaneously.
+
+## Message Structure
+
+Messages in OpenRealm, whether updates, likes, or profile changes, are small in size, comprising text and metadata, and are uniquely identified by their content hash. Users need to store larger content like images and videos externally, referencing them via URLs in their messages. Messages include user-generated timestamps for sequencing, though these are not considered secure.
+
+![messages](/images/messages.png)
+
+Messages should include implicit or explicit resource IDs to manage conflicts effectively. For instance, a message updating the display name of user 123 could incorporate the identifier 123.display_name. When multiple messages share the same identifier, the network retains the one with the highest sequence order, determined by comparing timestamps and, if identical, hash values.
+
+Reversible actions like likes can be undone by adding a remove message with a higher order than the add message. Messages introducing new content, such as posts, can be privately deleted through a remove message containing the hash of the add message, which the network then disregards.
+
+![](/images/message-delete.png)
+
+## Ensuring Authentication
+
+Users on OpenRealm add their fid to every message and authenticate it using their key pair, ensuring the message's integrity and verifiability. The authenticity of a message can be validated by correlating the fid with the key pair listed in the contract. If an fid is linked to a new key pair, all associated messages must be re-signed with the new keys.
+
+Users also have the option to delegate message signing to an alternative key pair, known as a signer. Applications can generate new signers, which users endorse by signing a message with their public key. This enables applications to send messages on behalf of users without controlling their actual identities.
+
+![](/images/auth.png)
+
+## Message-Graph
+
+OpenRealm conceptualizes a social network as a graph consisting of users, their content, and connections. The graph begins with users registered in the onchain identity registry, who can then add or remove graph nodes and edges via signed messages. This structure, known as a message-graph, is hosted on a server referred to as a Hub.
+
+![](/images/message-graph.png)
+
+Hubs synchronize these message-graphs across numerous instances to maintain decentralization. Social actions are generally independent, making conflicts rare but manageable through straightforward rules. For example, in cases where different messages alternately add and remove likes from a post, retaining the latest message and discarding previous ones is effective.
+
+CRDTs (Conflict-free Replicated Data Types) encode these rules, allowing message-graphs to achieve consensus without centralized coordination. Users can update multiple hubs via different apps, leading to eventual convergence of state. Each message type is associated with a CRDT that resolves conflicts using resource IDs. The deterministic conflict resolution is based on "last-write-wins" rules combined with timestamp-hash ordering.
+
+Message-graph CRDTs ensure that operations are commutative, associative, and idempotent while never moving causally backward. Each CRDT has a state $S$ and a merge function $merge(m, S)$ which accepts a message returns a new state $S' >= S$. Such CRDTs are called anonymous delta-state CRDTs[^delta-state] and can sync by comparing missing messages.
+
+Limiting the data users can add to CRDTs is essential to prevent operational impracticalities in Hubs, which could compromise network decentralization. This is managed by setting per-user data limits and removing messages with the lowest order. Additionally, time constraints can be applied to reduce the network size by evicting older messages.
+
+The message-graph provides less stringent guarantees than its components. Messages are valid in most CRDTs only if their signer is present in the signer CRDT. Syncing signer messages is a prerequisite for synchronizing other types, ensuring strong eventual consistency under ordered synchronization.
+
+## Applications and User Interactions
+
+Applications in the OpenRealm context refer to programs facilitating interaction with the OpenRealm network. These range from simple mobile clients communicating with a Hub to more complex backends that manage tasks like feed curation, suggestion algorithms, and notifications.
+
+Users have the flexibility to choose their preferred application type, and they can even utilize multiple apps concurrently. Applications can be self-hosted, with keys stored on the client side, delegated with a signer managing keys, or hosted with all key management done server-side.
+
+![](/images/applications.png)
+
