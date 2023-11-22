@@ -505,7 +505,7 @@ A conflict occurs if two messages have the same values for `m.data.fid`, `m.data
 
 The Reaction CRDT has a per-unit size limit of 2,500.
 
-### 3.1.5 Verification CRDT
+# Verification CRDT
 
 The Verification CRDT validates and accepts VerificationAddEthereumAddress and VerificationRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
@@ -519,7 +519,7 @@ A conflict occurs if there are two messages with the same value for `m.data.body
 
 The Verification CRDT has a per-unit size limit of 25.
 
-### 3.1.6 Link CRDT
+# Link CRDT
 
 The Link CRDT validates and accepts LinkAdd and LinkRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
@@ -533,7 +533,7 @@ A conflict occurs if there are two messages with the same values for `m.data.fid
 
 The Link CRDT has a per-unit size limit of 2,500.
 
-### 3.1.7 UsernameProof CRDT
+# UsernameProof CRDT
 
 The UsernameProof CRDT validates and accepts UsernameProof messages. It must also continuously re-validate ownership of the username by running a job at 2am UTC to verify ownership of all fnames and ENS Proofs. The CRDT also ensures that a UsernameProof message m passes these validations:
 
@@ -546,7 +546,7 @@ A conflict occurs if two messages that have the same value for `m.name`. Conflic
 
 The UsernameProof CRDT has a per-unit size limit of 5.
 
-# 4. Hub Specifications
+# Hub Specifications
 
 A Hub is a node in the OpenRealm network that provides an eventually consistent view of network state.
 
