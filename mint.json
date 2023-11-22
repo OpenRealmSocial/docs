@@ -48,6 +48,10 @@
 			]
 		},
 		{
+			"group": "Contracts",
+			"pages": "contracts/contract.mdx"
+		},
+		{
 			"group": "Hub",
 			"pages": [
 				"hub/get-started",
