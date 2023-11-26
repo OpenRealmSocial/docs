@@ -22,7 +22,7 @@ Previous decentralization efforts have varied in approach and success. ActivityP
 
 In OpenRealm, user identity is denoted by a numerical ID (e.g., 8930123) linked to a key pair. The system utilizes a smart contract registry on a Turing-complete blockchain to connect these identifiers to their respective key pairs. Users can create a new key pair or address and register their identity with the contract. The registry supports key rotation for security purposes, and smart contract wallets offer a safeguard against key loss.
 
-OpenRealm IDs, or fids, are inexpensive, non-descriptive numerical values available in abundance. Users have the option to attach readable names from various namespaces to their fids when using apps. This separation of identity and namespace ensures high levels of decentralization, leaving issues like name squatting and impersonation to the namespace layer. Users can select their preferred namespace or employ multiple simultaneously.
+OpenRealm IDs, or qids, are inexpensive, non-descriptive numerical values available in abundance. Users have the option to attach readable names from various namespaces to their qids when using apps. This separation of identity and namespace ensures high levels of decentralization, leaving issues like name squatting and impersonation to the namespace layer. Users can select their preferred namespace or employ multiple simultaneously.
 
 ## Message Structure
 
@@ -38,7 +38,7 @@ Reversible actions like likes can be undone by adding a remove message with a hi
 
 ## Ensuring Authentication
 
-Users on OpenRealm add their fid to every message and authenticate it using their key pair, ensuring the message's integrity and verifiability. The authenticity of a message can be validated by correlating the fid with the key pair listed in the contract. If an fid is linked to a new key pair, all associated messages must be re-signed with the new keys.
+Users on OpenRealm add their qid to every message and authenticate it using their key pair, ensuring the message's integrity and verifiability. The authenticity of a message can be validated by correlating the qid with the key pair listed in the contract. If an qid is linked to a new key pair, all associated messages must be re-signed with the new keys.
 
 Users also have the option to delegate message signing to an alternative key pair, known as a signer. Applications can generate new signers, which users endorse by signing a message with their public key. This enables applications to send messages on behalf of users without controlling their actual identities.
 

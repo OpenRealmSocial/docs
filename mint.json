@@ -38,7 +38,11 @@
 		},
 		{
 			"group": "Protocol",
-			"pages": ["protocol/overview", "protocol/concepts", "protocol/architecture","protocol/fnames","protocol/messages","protocol/governance","protocol/FIPs"]
+			"pages": ["protocol/overview", "protocol/concepts", "protocol/architecture","protocol/qnames","protocol/messages","protocol/governance","protocol/FIPs"]
+		},
+		{
+			"group": "Contracts",
+			"pages": ["contracts/L1-contract", "contracts/L2-contract", "contracts/hubs"]
 		},
 		{
 			"group": "Developer",
@@ -46,10 +50,6 @@
 				"developer/overview",
 				"developer/specification"
 			]
-		},
-		{
-			"group": "Contracts",
-			"pages": "contracts/contract.mdx"
 		},
 		{
 			"group": "Hub",

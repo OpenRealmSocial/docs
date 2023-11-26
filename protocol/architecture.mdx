@@ -15,7 +15,7 @@ Offchain systems are used for frequent actions where performance is critical. Me
 
 Registry contracts on Optimism Mainnet manage account identities, signers, and storage. There are three primary contracts:
 
-1. Id Registry - issues fids to create new accounts
+1. Id Registry - issues qids to create new accounts
 2. Storage Registry - tracks how much storage each account has
 3. Key Registry - lets accounts register message signers
 
@@ -25,7 +25,7 @@ The contracts are designed to be simple, non-upgradeable, and have a limited lif
 
 # Id Registry
 
-The Id Registry issues new OpenRealm accounts to Ethereum addresses. A user can make a transaction to acquire a unique, numeric identifier for the address called a OpenRealm ID or fid. An address can hold one fid at a time but can transfer them freely. Accounts may specify a recovery address, which can transfer the fid at any time.
+The Id Registry issues new OpenRealm accounts to Ethereum addresses. A user can make a transaction to acquire a unique, numeric identifier for the address called a OpenRealm ID or qid. An address can hold one qid at a time but can transfer them freely. Accounts may specify a recovery address, which can transfer the qid at any time.
 
 # Storage Registry
 
@@ -72,7 +72,7 @@ Users can associate ENS names with their accounts making it easy for others to m
 
 OpenRealm supports two kinds of ENS names today:
 
-fnames, which are free and governed by OpenRealm.
+qnames, which are free and governed by OpenRealm.
 .eth names, which cost money and are user-controlled.
 
-![](/images/fnames.png)
+![](/images/qname.png)

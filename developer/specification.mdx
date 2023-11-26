@@ -10,23 +10,23 @@ Version: `v0.1.0`
 
 # Smart Contracts
 
-Three distinct contracts manage the tracking of account identifiers (fids), their associated keys, and allocated storage space.
+Three distinct contracts manage the tracking of account identifiers (qids), their associated keys, and allocated storage space.
 
 ## Identity Registry
 
-The Identity Registry contract is responsible for maintaining a record of fids along with their corresponding custody addresses. It operates as a straightforward mapping from each fid to its custody address. An fid is considered valid only when listed in the Identity Registry.
+The Identity Registry contract is responsible for maintaining a record of qids along with their corresponding custody addresses. It operates as a straightforward mapping from each qid to its custody address. An qid is considered valid only when listed in the Identity Registry.
 
 The official Identity Registry contract can be found at /*needs to be added*/
 
 ## Key Registry
 
-This contract manages the approved signing keys for fids. A signer is deemed legitimate for an fid if they are registered in the Signature Registry specific to that fid. Only the fid's custody address has the authority to add or remove signers.
+This contract manages the approved signing keys for qids. A signer is deemed legitimate for an qid if they are registered in the Signature Registry specific to that qid. Only the qid's custody address has the authority to add or remove signers.
 
 The official Signature Registry contract is available at *needs to be added*\
 
 ## Storage Registry
 
-This contract keeps a log of the storage space allotted to each fid, quantified in integer units. Each CRDT defines its storage capacity per unit.
+This contract keeps a log of the storage space allotted to each qid, quantified in integer units. Each CRDT defines its storage capacity per unit.
 
 You can view the official Allocation Registry contract at *needs to be added*
 
@@ -105,12 +105,12 @@ A pariwise comparison of two distinct hashes $x$ and $y$ is performed by compari
 
 A MessageData contains the payload of the Message, which is hashed and signed to produce the message.
 
-A `MessageData` object contains generic properties like the `fid`, `network` `timestamp` and `type` along with a `body`, which varies based on the `type`.
+A `MessageData` object contains generic properties like the `qid`, `network` `timestamp` and `type` along with a `body`, which varies based on the `type`.
 
 ```protobuf
 message MessageData {
   MessageType type = 1;
-  uint64 fid = 2;
+  uint64 qid = 2;
   uint32 timestamp = 3;
   OpenRealmNetwork network = 4;
   oneof body {
@@ -130,7 +130,7 @@ message MessageData {
 A MessageData `data` in a Message `m` must pass the following validations:
 
 1. `m.data.type` must be a valid MessageType.
-2. `m.data.fid` must be an integer >= 0.
+2. `m.data.qid` must be an integer >= 0.
 3. `m.data.timestamp` must be a valid OpenRealm epoch timestamp not more than 600 seconds ahead of the current time.
 4. `m.data.network` must be a valid Network.
 5. `m.data.body` must be a valid body.
@@ -177,11 +177,11 @@ enum OpenRealmNetwork {
 
 A _Signer_ is an Ed25519[^ed25519] key pair that applications can use to authorize messages.
 
-A user authorizes an application's Signer with a signature from their custody address currently holding their fid. The application can use the Signer to authorize Casts, Reactions and Verifications for that user. Users can revoke a Signer at any time with a signature from their custody address.
+A user authorizes an application's Signer with a signature from their custody address currently holding their qid. The application can use the Signer to authorize Casts, Reactions and Verifications for that user. Users can revoke a Signer at any time with a signature from their custody address.
 
 ![](/images/signers-chart.png)
 
-A Signer is added or removed by registering the public key of the signer to an fid with a smart contract at a well known address. Signers can only be added for the fid owned by the caller of the contract.
+A Signer is added or removed by registering the public key of the signer to an qid with a smart contract at a well known address. Signers can only be added for the qid owned by the caller of the contract.
 
 # User Data
 
@@ -214,10 +214,10 @@ A UserDataAddBody in a Message `m` is valid only if it passes these validations:
 5. If `m.data.body.type` is `USER_DATA_TYPE_DISPLAY`, value must be `<= 32 bytes`
 6. If `m.data.body.type` is `USER_DATA_TYPE_BIO`, value must be `<= 256 bytes`
 7. If `m.data.body.type` is `USER_DATA_TYPE_URL`, value must be `<= 256 bytes`
-8. If `m.data.body.type` is `USER_DATA_TYPE_USERNAME`, value must map to a valid fname.
+8. If `m.data.body.type` is `USER_DATA_TYPE_USERNAME`, value must map to a valid qname.
 9. `m.data.body.value` must be a valid utf-8 string
 
-A username is considered valid only if the most recent event for the fid `Transfer` event with the custody address in the `to` property. If a valid username for a given fid becomes invalid, and there is a UserDataAdd message for that fid with the fname as its value, it must be revoked. The underlying username proofs are checked once per day to determine if they are still valid.
+A username is considered valid only if the most recent event for the qid `Transfer` event with the custody address in the `to` property. If a valid username for a given qid becomes invalid, and there is a UserDataAdd message for that qid with the qname as its value, it must be revoked. The underlying username proofs are checked once per day to determine if they are still valid.
 
 # Casts
 
@@ -227,7 +227,7 @@ Casts may specify another cast as their parent, creating a threaded conversation
 
 ![](/images/casts.png)
 
-A cast may mention users, but mentions are stored separately from the text property. A mention is created by adding the user's fid to the `mentions` array and its position in bytes in the text field into the `mentions_positions` array. Casts may have up to 10 mentions. The cast "🤓 @openrealm says hello" would be represented as:
+A cast may mention users, but mentions are stored separately from the text property. A mention is created by adding the user's qid to the `mentions` array and its position in bytes in the text field into the `mentions_positions` array. Casts may have up to 10 mentions. The cast "🤓 @openrealm says hello" would be represented as:
 
 ```ts
 {
@@ -241,7 +241,7 @@ Casts are added with a `CastAdd` message and removed with a tombstone `CastRemov
 ```protobuf
 message CastAddBody {
   repeated string embeds_deprecated = 1;  // Deprecated embeds field
-  repeated uint64 mentions = 2;           // User fids mentioned in the text
+  repeated uint64 mentions = 2;           // User qids mentioned in the text
   oneof parent {                          // Optional parent of the cast
     CastId parent_cast_id = 3;
     string parent_url = 7; // Parent URL
@@ -257,7 +257,7 @@ message CastRemoveBody {
 }
 
 message CastId {
-  uint64 fid = 1;                           // Fid of the cast's author
+  uint64 qid = 1;                           // qid of the cast's author
   bytes hash = 2;                           // Message.hash value of the cast
 }
 
@@ -291,7 +291,7 @@ A CastRemoveBody in a message `m` is valid only if it passes these validations:
 
 A CastId `c` is valid only if it passes these validations:
 
-1. `c.fid` is an integer > 0
+1. `c.qid` is an integer > 0
 2. `c.hash` is exactly 20 bytes.
 
 # Reactions
@@ -340,7 +340,7 @@ A Verification requires a signed VerificationClaim produced by the Ethereum Addr
 
 ```ts
 struct VerificationClaim {
-  BigInt fid;         // Fid of the user making the claim
+  BigInt qid;         // qid of the user making the claim
   string address;     // Ethereum address signing the claim
   string network;     // OpenRealm network that the claim is meant for
   string blockHash;   // Blockhash at which the claim was made
@@ -380,7 +380,7 @@ message LinkBody {
   string type = 1;
   optional uint32 displayTimestamp = 2; // If set, clients should use this as the follow create time
   oneof target {
-    uint64 fid = 3;
+    uint64 qid = 3;
   }
 }
 ```
@@ -390,7 +390,7 @@ A Link message `m` must pass these validations and the validations for LinkAdd o
 1.  `m.signature_scheme` must be `SIGNATURE_SCHEME_ED25519`.
 2.  `m.data.body` must be `LinkBody`.
 3.  `m.data.body.type` must be ≤ 8 bytes.
-4.  `m.data.body.target` must be a known fid.
+4.  `m.data.body.target` must be a known qid.
 5.  `m.data.body.displayTimestamp` must be ≤ `m.data.timestamp`
 
 A LinkAdd message `m` is valid only if it passes these validations:
@@ -406,7 +406,7 @@ A LinkRemove in a message `m` is valid only if it passes these validations:
 ```protobuf
 enum UserNameType {
   USERNAME_TYPE_NONE = 0;
-  USERNAME_TYPE_ENS_FNAME = 1;
+  USERNAME_TYPE_ENS_Qname = 1;
   USERNAME_TYPE_ENS_L1 = 2;
 }
 
@@ -415,7 +415,7 @@ message UserNameProofBody {
   bytes name = 2;
   bytes owner = 3;
   bytes signature = 4;
-  uint64 fid = 5;
+  uint64 qid = 5;
   UserNameType type = 6;
 }
 ```
@@ -425,13 +425,13 @@ A UsernameProof message `m` must pass these validations:
 1. `m.signature_scheme` must be `SIGNATURE_SCHEME_ED25519`.
 2. `m.data.body` must be `UserNameProofBody`.
 3. `m.data.body.timestamp` must be ≤ 10 mins ahead of current timestamp.
-4. `m.data.body.fid` must be a known fid.
+4. `m.data.body.qid` must be a known qid.
 
-A UsernameProof message `m` of type `USERNAME_TYPE_ENS_FNAME` must also pass these validations:
+A UsernameProof message `m` of type `USERNAME_TYPE_ENS_Qname` must also pass these validations:
 
 1. `m.data.body.name` name must match the regular expression `/^[a-z0-9][a-z0-9-]{0,15}$/`.
-2. `m.data.body.owner` must be the custody address of the fid.
-3. `m.data.body.signature` must be a valid ECDSA signature on the EIP-712 Username Proof message from the owner or the public key of the fname server.
+2. `m.data.body.owner` must be the custody address of the qid.
+3. `m.data.body.signature` must be a valid ECDSA signature on the EIP-712 Username Proof message from the owner or the public key of the qname server.
 
 A UsernameProof message `m` of type `USERNAME_TYPE_ENS_L1` must also pass these validations:
 
@@ -439,7 +439,7 @@ A UsernameProof message `m` of type `USERNAME_TYPE_ENS_L1` must also pass these 
    1. be a valid, unexpired ENS name
    2. match the regular expression `/^[a-z0-9][a-z0-9-]{0,15}\.eth$/`
 2. `m.data.body.owner` must:
-   1. be the custody address or an address that the fid has a valid VerificationMessage for.
+   1. be the custody address or an address that the qid has a valid VerificationMessage for.
    2. be the address that the ENS names resolves to.
 3. `m.data.body.signature` must be a valid ECDSA signature on the EIP-712 Username Proof message from the owner of the ENS name.
 
@@ -457,21 +457,21 @@ CRDTs also prune messages when they reach a certain size per user to prevent the
 
 All CRDTs must implement the following rules for validating messages:
 
-1. Messages with an EIP-712 signature scheme are only valid if the signing Ethereum address is the owner of the fid.
-2. Messages with an ED25519 signature scheme are only valid if the signing key pair is a Signer is present in the Key registry for the fid and has never been removed.
-3. Messages are only valid if the fid is owned by the custody address that signed the message, or the signer of the message, which is specified by the Id Registry.
+1. Messages with an EIP-712 signature scheme are only valid if the signing Ethereum address is the owner of the qid.
+2. Messages with an ED25519 signature scheme are only valid if the signing key pair is a Signer is present in the Key registry for the qid and has never been removed.
+3. Messages are only valid if the qid is owned by the custody address that signed the message, or the signer of the message, which is specified by the Id Registry.
 
 External actions on blockchains or in other CRDTs can cause messages to become invalid. Such actions must cause an immediate revocation of messages which are discarded from CRDTs, according to the following rules:
 
-1. When a Signer is removed for an fid from the Key registry, all messages signed by the signer in other CRDTs should be revoked.
+1. When a Signer is removed for an qid from the Key registry, all messages signed by the signer in other CRDTs should be revoked.
 
 # UserData CRDT
 
 The UserData CRDT validates and accepts UserDataAdd messages. The CRDT also ensures that a UserDataAdd message `m` passes these validations:
 
-1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
-A conflict occurs if two messages have the same values for `m.data.fid` and `m.data.body.type`. Conflicts are resolved with the following rules:
+A conflict occurs if two messages have the same values for `m.data.qid` and `m.data.body.type`. Conflicts are resolved with the following rules:
 
 1. If `m.data.timestamp` values are distinct, discard the message with the lower timestamp.
 2. If `m.data.timestamp` values are identical, discard the message with the lower lexicographical order.
@@ -482,7 +482,7 @@ The UserData CRDT has a per-unit size limit of 50, even though this is practical
 
 The Cast CRDT validates and accepts CastAdd and CastRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
-1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
 A conflict occurs if there exists a CastAdd Message and a CastRemove message whose `m.hash` and `m.data.body.target_hash` are identical, or if there are two CastRemove messages whose `m.data.body.target_hash` are identical. Conflicts are resolved with the following rules:
 
@@ -495,9 +495,9 @@ The Cast CRDT has a per-unit size limit of 5,000.
 # Reaction CRDT
 The Reaction CRDT validates and accepts ReactionAdd and ReactionRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
-1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
-A conflict occurs if two messages have the same values for `m.data.fid`, `m.data.body.target` and `m.data.body.type`. Conflicts are resolved with the following rules:
+A conflict occurs if two messages have the same values for `m.data.qid`, `m.data.body.target` and `m.data.body.type`. Conflicts are resolved with the following rules:
 
 1. If `m.data.timestamp` is distinct, discard the message with the lower timestamp.
 2. If `m.data.timestamp` is identical and `m.data.type` is distinct, discard the ReactionAdd message.
@@ -505,11 +505,11 @@ A conflict occurs if two messages have the same values for `m.data.fid`, `m.data
 
 The Reaction CRDT has a per-unit size limit of 2,500.
 
-# Verification CRDT
+### 3.1.5 Verification CRDT
 
 The Verification CRDT validates and accepts VerificationAddEthereumAddress and VerificationRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
-1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
 A conflict occurs if there are two messages with the same value for `m.data.body.address`. Conflicts are resolved with the following rules:
 
@@ -519,13 +519,13 @@ A conflict occurs if there are two messages with the same value for `m.data.body
 
 The Verification CRDT has a per-unit size limit of 25.
 
-# Link CRDT
+### 3.1.6 Link CRDT
 
 The Link CRDT validates and accepts LinkAdd and LinkRemove messages. The CRDT also ensures that the message `m` passes these validations:
 
-1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1. `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
-A conflict occurs if there are two messages with the same values for `m.data.fid`, `m.data.body.type`, `m.data.body.target`. Conflicts are resolved with the following rules:
+A conflict occurs if there are two messages with the same values for `m.data.qid`, `m.data.body.type`, `m.data.body.target`. Conflicts are resolved with the following rules:
 
 1. If `m.data.timestamp` is distinct, discard the message with the lower timestamp.
 2. If `m.data.timestamp` is identical and `m.data.type` is distinct, discard the LinkAdd message.
@@ -533,20 +533,20 @@ A conflict occurs if there are two messages with the same values for `m.data.fid
 
 The Link CRDT has a per-unit size limit of 2,500.
 
-# UsernameProof CRDT
+### 3.1.7 UsernameProof CRDT
 
-The UsernameProof CRDT validates and accepts UsernameProof messages. It must also continuously re-validate ownership of the username by running a job at 2am UTC to verify ownership of all fnames and ENS Proofs. The CRDT also ensures that a UsernameProof message m passes these validations:
+The UsernameProof CRDT validates and accepts UsernameProof messages. It must also continuously re-validate ownership of the username by running a job at 2am UTC to verify ownership of all qnames and ENS Proofs. The CRDT also ensures that a UsernameProof message m passes these validations:
 
-1 `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.fid`
+1 `m.signer` must be a valid Signer in the add-set of the Signer CRDT for `message.qid`
 
 A conflict occurs if two messages that have the same value for `m.name`. Conflicts are resolved with the following rules:
 
 1. If m.data.timestamp values are distinct, discard the message with the lower timestamp.
-2. If m.data.timestamp values are identical, discard the message with the lower fid
+2. If m.data.timestamp values are identical, discard the message with the lower qid
 
 The UsernameProof CRDT has a per-unit size limit of 5.
 
-# Hub Specifications
+# 4. Hub Specifications
 
 A Hub is a node in the OpenRealm network that provides an eventually consistent view of network state.
 
@@ -608,7 +608,7 @@ Hubs must maintain a [Merkle Patricia Trie](https://ethereum.org/en/developers/d
 ```
 10 bytes: timestamp
 1 byte:   message type
-4 bytes:  fid
+4 bytes:  qid
 1 byte:   crdt / set type
 20 bytes: hash
 ```
@@ -689,49 +689,49 @@ service HubService {
 
   // Casts
   rpc GetCast(CastId) returns (Message);
-  rpc GetCastsByFid(FidRequest) returns (MessagesResponse);
+  rpc GetCastsByqid(qidRequest) returns (MessagesResponse);
   rpc GetCastsByParent(CastsByParentRequest) returns (MessagesResponse);
-  rpc GetCastsByMention(FidRequest) returns (MessagesResponse);
+  rpc GetCastsByMention(qidRequest) returns (MessagesResponse);
 
   // Reactions
   rpc GetReaction(ReactionRequest) returns (Message);
-  rpc GetReactionsByFid(ReactionsByFidRequest) returns (MessagesResponse);
+  rpc GetReactionsByqid(ReactionsByqidRequest) returns (MessagesResponse);
   rpc GetReactionsByCast(ReactionsByTargetRequest) returns (MessagesResponse); // To be deprecated
   rpc GetReactionsByTarget(ReactionsByTargetRequest) returns (MessagesResponse);
 
   //Links
   rpc GetLink(LinkRequest) returns (Message);
-  rpc GetLinksByFid(LinksByFidRequest) returns (MessagesResponse);
+  rpc GetLinksByqid(LinksByqidRequest) returns (MessagesResponse);
   rpc GetLinksByTarget(LinksByTargetRequest) returns (MessagesResponse);
-  rpc GetAllLinkMessagesByFid(FidRequest) returns (MessagesResponse);
+  rpc GetAllLinkMessagesByqid(qidRequest) returns (MessagesResponse);
 
   // User Data
   rpc GetUserData(UserDataRequest) returns (Message);
-  rpc GetUserDataByFid(FidRequest) returns (MessagesResponse);
+  rpc GetUserDataByqid(qidRequest) returns (MessagesResponse);
 
   // Verifications
   rpc GetVerification(VerificationRequest) returns (Message);
-  rpc GetVerificationsByFid(FidRequest) returns (MessagesResponse);
+  rpc GetVerificationsByqid(qidRequest) returns (MessagesResponse);
 
    // OnChain Events
    rpc GetOnChainSigner(SignerRequest) returns (OnChainEvent);
-   rpc GetOnChainSignersByFid(FidRequest) returns (OnChainEventResponse);
+   rpc GetOnChainSignersByqid(qidRequest) returns (OnChainEventResponse);
    rpc GetOnChainEvents(OnChainEventRequest) returns (OnChainEventResponse);
-   rpc GetIdRegistryOnChainEvent(FidRequest) returns (OnChainEvent);
+   rpc GetIdRegistryOnChainEvent(qidRequest) returns (OnChainEvent);
    rpc GetIdRegistryOnChainEventByAddress(IdRegistryEventByAddressRequest) returns (OnChainEvent);
-   rpc GetCurrentStorageLimitsByFid(FidRequest) returns (StorageLimitsResponse);  rpc GetFids(FidsRequest) returns (FidsResponse);
-   rpc GetFids(FidsRequest) returns (FidsResponse);
+   rpc GetCurrentStorageLimitsByqid(qidRequest) returns (StorageLimitsResponse);  rpc Getqids(qidsRequest) returns (qidsResponse);
+   rpc Getqids(qidsRequest) returns (qidsResponse);
 
   // Username Proofs
   rpc GetUserNameProof(UserNameProofRequest) returns (UserNameProof);
-  rpc GetUserNameProofsByFid(FidRequest) returns (UserNameProofsResponse);
+  rpc GetUserNameProofsByqid(qidRequest) returns (UserNameProofsResponse);
 
   // Bulk Methods
-  rpc GetAllCastMessagesByFid(FidRequest) returns (MessagesResponse);
-  rpc GetAllReactionMessagesByFid(FidRequest) returns (MessagesResponse);
-  rpc GetAllVerificationMessagesByFid(FidRequest) returns (MessagesResponse);
-  rpc GetAllSignerMessagesByFid(FidRequest) returns (MessagesResponse);
-  rpc GetAllUserDataMessagesByFid(FidRequest) returns (MessagesResponse);
+  rpc GetAllCastMessagesByqid(qidRequest) returns (MessagesResponse);
+  rpc GetAllReactionMessagesByqid(qidRequest) returns (MessagesResponse);
+  rpc GetAllVerificationMessagesByqid(qidRequest) returns (MessagesResponse);
+  rpc GetAllSignerMessagesByqid(qidRequest) returns (MessagesResponse);
+  rpc GetAllUserDataMessagesByqid(qidRequest) returns (MessagesResponse);
 }
 
 message SubscribeRequest {
@@ -743,21 +743,21 @@ message EventRequest {
   uint64 id = 1;
 }
 
-message FidRequest {
-  uint64 fid = 1;
+message qidRequest {
+  uint64 qid = 1;
   optional uint32 page_size = 2;
   optional bytes page_token = 3;
   optional bool reverse = 4;
 }
 
-message FidsRequest {
+message qidsRequest {
   optional uint32 page_size = 1;
   optional bytes page_token = 2;
   optional bool reverse = 3;
 }
 
-message FidsResponse {
-  repeated uint64 fids = 1;
+message qidsResponse {
+  repeated uint64 qids = 1;
   optional bytes next_page_token = 2;
 }
 
@@ -777,7 +777,7 @@ message CastsByParentRequest {
 }
 
 message ReactionRequest {
-  uint64 fid = 1;
+  uint64 qid = 1;
   ReactionType reaction_type = 2;
   oneof target {
     CastId target_cast_id = 3;
@@ -785,8 +785,8 @@ message ReactionRequest {
   }
 }
 
-message ReactionsByFidRequest {
-  uint64 fid = 1;
+message ReactionsByqidRequest {
+  uint64 qid = 1;
   optional ReactionType reaction_type = 2;
   optional uint32 page_size = 3;
   optional bytes page_token = 4;
@@ -805,15 +805,15 @@ message ReactionsByTargetRequest {
 }
 
 message LinkRequest {
-  uint64 fid = 1;
+  uint64 qid = 1;
   string link_type = 2;
   oneof target {
-    uint64 target_fid = 3;
+    uint64 target_qid = 3;
   }
 }
 
-message LinksByFidRequest {
-  uint64 fid = 1;
+message LinksByqidRequest {
+  uint64 qid = 1;
   optional string link_type = 2;
   optional uint32 page_size = 3;
   optional bytes page_token = 4;
@@ -822,7 +822,7 @@ message LinksByFidRequest {
 
 message LinksByTargetRequest {
   oneof target {
-    uint64 target_fid = 1;
+    uint64 target_qid = 1;
   }
   optional string link_type = 2;
   optional uint32 page_size = 3;
@@ -839,17 +839,17 @@ message UserNameProofsResponse {
 }
 
 message UserDataRequest {
-  uint64 fid = 1;
+  uint64 qid = 1;
   UserDataType user_data_type = 2;
 }
 
 message VerificationRequest {
-  uint64 fid = 1;
+  uint64 qid = 1;
   bytes address = 2;
 }
 
 message SignerRequest {
-  uint64 fid = 1;
+  uint64 qid = 1;
   bytes signer = 2;
 }
 
@@ -869,7 +869,7 @@ message OnChainEvent {
    uint64 block_timestamp = 5;
    bytes transaction_hash = 6;
    uint32 log_index = 7;
-   uint64 fid = 8;
+   uint64 qid = 8;
    oneof body {
       SignerEventBody signer_event_body = 9;
       SignerMigratedEventBody signer_migrated_event_body = 10;
@@ -919,7 +919,7 @@ message StorageRentEventBody {
 }
 
 message OnChainEventRequest {
-   uint64 fid = 1;
+   uint64 qid = 1;
    OnChainEventType event_type = 2;
    optional uint32 page_size = 3;
    optional bytes page_token = 4;
@@ -951,45 +951,45 @@ message StorageLimit {
 }
 ```
 
-# Fname Specifications
+# Qname Specifications
 
 # ENS CCIP Contract
 
-A CCIP [ENSIP-10](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) contract will be deployed on L1 which resolves \*.fcast.id names to owner addresses. It stores the URL of the nameserver and validates signatures provided by the nameserver. This resolver will support addr record lookups only. The address of the contract is **\_\_** (to be filled on deployment).
+A CCIP [ENSIP-10](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution) contract will be deployed on L1 which resolves \*.qcast.id names to owner addresses. It stores the URL of the nameserver and validates signatures provided by the nameserver. This resolver will support addr record lookups only. The address of the contract is **\_\_** (to be filled on deployment).
 
 # Name Server
 
-The server which resolves `*.fcast.id` names lives at `fnames.openrealm.social`. Fnames can be claimed by submitting an EIP-712 signed message that proves ownership of an fid that does not yet have an fname. The server also provides a method to transfer fnames to other fids by proving ownership of the fname.
+The server which resolves `*.qcast.id` names lives at `qnames.openrealm.social`. Qnames can be claimed by submitting an EIP-712 signed message that proves ownership of an qid that does not yet have an qname. The server also provides a method to transfer qnames to other qids by proving ownership of the qname.
 
-Usernames are also valid subdomains (e.g. [foo.fcast.id.openrealm.social] ) though they do not currently resolve to anything. A future upgrade to the nameserver may allow the owner to set a redirect record here. The following usernames are not available for registration, since they collide with existing subdomains — `www`, `fnames`
+Usernames are also valid subdomains (e.g. [foo.qcast.id.openrealm.social] ) though they do not currently resolve to anything. A future upgrade to the nameserver may allow the owner to set a redirect record here. The following usernames are not available for registration, since they collide with existing subdomains — `www`, `qnames`
 
-# Managing Fname Ownership
+# Managing Qname Ownership
 
 A POST request to the `/transfers` endpoint can be made register, move or deregister a username. The request body must contain :
 
 ```jsx
 {
-  "from": <fid>"                   // 0 for registering a new fname
-  "to": <fid>                      // 0 for unregistering an existing fname
-  "name": "<username>",            // fname
+  "from": <qid>"                   // 0 for registering a new qname
+  "to": <qid>                      // 0 for unregistering an existing qname
+  "name": "<username>",            // qname
   "timestamp": <current_timestamp> // Second resolution
-  "owner": "<address>"             // ETH custody address of the non-zero "from"/"to" fid as of timestamp
+  "owner": "<address>"             // ETH custody address of the non-zero "from"/"to" qid as of timestamp
   "signature": ""                  // hex EIP-712 signature signed by the "owner" address
 }
 ```
 
 The request is rejected unless it meets the following criteria:
 
-1. The fname is owned by the “from” fid or is not owned by anyone.
-2. The “to” fid does not currently own a username.
+1. The qname is owned by the “from” qid or is not owned by anyone.
+2. The “to” qid does not currently own a username.
 3. The name matches the regular expression `/^[a-z0-9][a-z0-9-]{0,15}$/`.
 4. The timestamp is ≤ current time + 1 minute (for clock skew).
 5. The owner must be
-   1. the address that owns the “from” fid, if the “from” fid is not 0.
-   2. the address that owns the “to” fid, if the “from” fid is 0.
+   1. the address that owns the “from” qid, if the “from” qid is not 0.
+   2. the address that owns the “to” qid, if the “from” qid is 0.
    3. a privileged admin address
 6. The signature is a valid EIP-712 message from the “owner” which contains the name, timestamp and owner properties.
-7. If there exists an existing proof for the fid, the timestamp of this message must be `2419200` seconds (28 days) ahead of that timestamp to prevent abuse. i.e. an fid can only change their name once every 28 days
+7. If there exists an existing proof for the qid, the timestamp of this message must be `2419200` seconds (28 days) ahead of that timestamp to prevent abuse. i.e. an qid can only change their name once every 28 days
 
 The domain and types for the EIP-712 signature are described below:
 
@@ -1010,7 +1010,7 @@ const types = {
 };
 ```
 
-# Verifying Fname Ownership
+# Verifying Qname Ownership
 
 Anyone can verify that a user requested verification of a name by making a call to the server. usrs can make a GET request to `/transfers` which returns a paginated list of events with the following schema:
 
@@ -1039,7 +1039,7 @@ Results can be filtered with these query string parameters:
 ```jsx
 from_id=<id>        // minimum id
 from_ts=<timestamp> // minumum timestamp
-fid=<fid>           // filter events by a particular fid
+qid=<qid>           // filter events by a particular qid
 name=<username>     // filter events for a particular name
 ```
 
