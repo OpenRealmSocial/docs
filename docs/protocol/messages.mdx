@@ -1,0 +1,75 @@
+---
+title: 'Messages'
+description:
+  'A message is a public update from an account. There are different kinds of messages like posts, reactions, or follows. They are signed by an account and stored on OpenRealm Hubs. A message is encoded as a protobuf, hashed with Blake3, and signed with an Ed25519 signature from the accounts signer.'
+---
+
+# Types of Messages 
+
+1. Posts: General updates or announcements.
+2. Reactions: Responses to posts or URLs, like likes or recasts.
+3. Follows: Indicating a user follows another account.
+4. Verifications: Confirming ownership of an Ethereum address.
+5. UserData: Providing metadata about an account.
+
+# Message Storage and Limits
+
+Messages are stored on OpenRealm Hubs and are subject to storage limits based on the type of message and the rented storage units from the Storage Registry.
+
+| Category      | Limit           |
+|---------------|-----------------|
+| Casts         | 5,000           |
+| Reactions     | 2,500           |
+| Links         | 2,500           |
+| Verifications | 50              |
+| UserData      | 50              |
+
+
+# Ordering and Expiration
+
+Messages include timestamps for display and ordering, though these are user-reported and not verifiable.
+When storage limits are exceeded, the oldest messages (based on timestamps) are discarded, with the message hash serving as a tiebreaker.
+
+# Specific Message Types
+
+1. Casts
+
+Definition: Short, public messages with text, URLs, and mentions.
+Content: Can contain up to 320 bytes of text, two URLs, and five mentions.
+Management: Operate on a first-in, first-out basis when limits are reached.
+
+2. Threads
+
+Function: Replies to casts form threads, with each reply referencing the parent cast's ID.
+Structure: A cast without a parent ID is a top-level cast, while replies form a thread.
+
+3. Channels
+
+Channels organize casts by topics, similar to forums. A cast can denote a topic URI as its parent, defining the channel's scope.
+
+4. Reactions
+
+Function: Indicate a relationship between an account and a target (cast or URL).
+Types: Likes or recasts, managed on a first-in, first-out basis upon limit exceedance.
+
+5. Links
+
+Function: Indicate following relationships between accounts.
+Management: Operate on a first-in, first-out basis with a display timestamp for expiration management.
+
+6. Verifications
+
+Purpose: Prove ownership of an Ethereum address, using signatures from both the Ethereum address and the account's signer.
+Standard: Utilizes the EIP-712 standard for signature requests.
+
+7. UserData
+
+Uniqueness: Only one message per type is retained; older duplicates are discarded.
+
+| Type      | Description                               |
+|-----------|-------------------------------------------|
+| pfp       | URL of a profile picture                  |
+| display   | Display name for the account              |
+| bio       | Short biography about the account         |
+| url       | URL of the account's homepage             |
+| username  | Active username of the account            |
