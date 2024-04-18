@@ -37,6 +37,10 @@
 			]
 		},
 		{
+			"group": "Client",
+			"pages": ["client/login"]
+		},
+		{
 			"group": "Protocol",
 			"pages": ["protocol/overview", "protocol/concepts", "protocol/architecture","protocol/qnames","protocol/messages","protocol/governance","protocol/FIPs"]
 		},
@@ -48,7 +52,10 @@
 			"group": "Developer",
 			"pages": [
 				"developer/overview",
-				"developer/specification"
+				{
+					"group": "API",
+					"pages": ["developer/api/getProfile"]
+				}
 			]
 		},
 		{

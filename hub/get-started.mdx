@@ -1,5 +1,28 @@
 ---
 title: 'Get Started'
 description:
-  ''
+  'Hub is an implementation of a [Openrealm Hub](https://github.com/openrealmxyz/protocol), written in [TypeScript](https://www.typescriptlang.org/) and [Rust](https://www.rust-lang.org/).'
 ---
+
+# Hub
+
+Hub creates a private instance of the Openrealm network on your machine. It stores a copy of every message from every user and syncs with other hubs to stay up to date. Messages uploaded to Hub will be broadcast to other Hubs. 
+
+We recommend running your own instance of Hub if you are building an application, need access to the latest data or want to help decentralize the network.
+
+
+## Public Instances
+
+The Openrealm team runs some instances of Hub for use by the public. These instances are not guaranteed to be stable, and are read-only for now. 
+
+```bash
+url: nemes.openrealm.social
+httpapi_port: 2281
+gossipsub_port: 2282
+grpc_port: 2283
+```
+
+
+## Hosted Instances
+
+Hub instances can also be hosted for you by other service providers. While we recommend running your own instance for sovereignty and security, it may be useful to use these services to prototype quickly.

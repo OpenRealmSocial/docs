@@ -3,3 +3,81 @@ title: 'Installation'
 description:
   ''
 ---
+
+We recommend running Hub on an always-on server that has [Docker](https://docs.docker.com/desktop/install/linux-install/) installed. 
+
+# Requirements
+
+Hub can be installed in 30 minutes, and a full sync can take 1-2 hours to complete. You'll need a machine that has: 
+
+- 8 GB of RAM
+- 2 CPU cores or vCPUs
+- 20 GB of free storage
+- A public IP address with ports 2282 - 2285 exposed
+
+See tutorials for instructions on how to set up cloud providers to run Hub.
+
+You will need RPC endpoints for Ethereum nodes on L2 OP Mainnet, L1 Mainnet and L1 Goerli. We recommend using a service like [Alchemy](https://www.alchemy.com/) or [Infura](https://www.infura.io/).
+
+# Install via Script
+
+The install script is the simplest way to set up Hub. 
+
+```bash
+curl -sSL https://download.openrealm.social/bootstrap.sh | bash
+```
+
+*If you're using macOS, you'll need to have docker installed and running.*
+
+Hub will be installed into `~/hub` and will be run via Docker in the background, along with Grafana and Prometheus for [monitoring](monitoring.md). If you have trouble with the script, try [installing via docker](#install-via-docker).
+
+# Upgrading Hub
+
+Upgrade Hub to the latest version by running
+
+```bash
+cd ~/hub && ./hub.sh upgrade
+```
+
+# Install via Docker
+
+Hub can also be set up by running the docker image directly. To do this: 
+
+1. Check out the [hub-monorepo](https://github.com/openrealmxyz/hub) locally.
+2. From the root of this folder navigate to `/hub`
+3. Generate your identity key pair with docker compose.
+
+```bash
+docker compose run hub yarn identity create
+```
+
+4. Create a .env file in `/hub` with your Ethereum RPC endpoints:
+
+```bash
+# Set this to your L1 Mainnet ETH RPC URL
+ETH_MAINNET_RPC_URL=your-ETH-mainnet-RPC-URL
+
+# Set this to your L2 Optimism Mainnet RPC URL
+OPTIMISM_L2_RPC_URL=your-L2-optimism-RPC-URL
+
+# Set this to your Openrealm QID
+HUB_OPERATOR_QID=your-qid
+```
+
+5. Follow the instructions to set connect to network into the section networks
+
+6. Start Hub with docker compose in detached mode:
+
+```bash
+docker compose up hub -d
+``` 
+
+Docker compose will start a Hub container that exposes ports for networking and writes data to `.hub` and `.rocks` directories. Hub will now sync with the contracts and other hub instances to download all messages on the network. 
+
+7. To view the status of the sync and hub, follow the logs
+
+```bash
+docker compose logs -f hub
+```
+
+8. Follow the instructions in the monitoring instructions to set up Grafana and view your Hub's status in real-time.
